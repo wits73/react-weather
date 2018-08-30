@@ -4,7 +4,8 @@ import Weather from "./Weather";
 
 export default class App extends Component {
   state = {
-    isLoaded: false
+    isLoaded: false,
+    error:null
   };
 
   componentDidMount() {
@@ -15,16 +16,19 @@ export default class App extends Component {
           //lat: position.coords.latitude,
           //long: position.coords.longitude,
           isLoaded: true
+          //error:'somthing wrong'
         });
       },
       error => {
-        console.log(error);
-      }
+        this.setState({
+          error:error
+        })
+      } 
     );
   }
 
   render() {
-    const { isLoaded } = this.state;
+    const { isLoaded, error } = this.state;
 
 
 
@@ -36,6 +40,7 @@ export default class App extends Component {
           (
             <View style={styles.loading}>
               <Text style={styles.loadingText}>Getting the weather</Text>
+              {error ? <Text style={styles.errorText}>{error}</Text> : null}
             </View>
           )
         }
@@ -48,6 +53,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff"
+  },
+  errorText:{
+    color:"red",
+    backgroundColor: "transparent",
+    marginBottom:25 
   },
   loading: {
     flex: 1,
