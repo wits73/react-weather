@@ -3,47 +3,56 @@ import { StyleSheet, Text, View, StatusBar } from "react-native";
 import Weather from "./Weather";
 
 export default class App extends Component {
-  state = {
+  state = { 
     isLoaded: false,
-    error:null
+    lat: null,
+    long: null,
+    error: null,
+    name: null,
+    temperature:null
   };
-
-  componentDidMount() {
+  componentDidMount = () => {
     navigator.geolocation.getCurrentPosition(
       position => {
-        console.log(position);
-        this.setState({
-          //lat: position.coords.latitude,
-          //long: position.coords.longitude,
-          isLoaded: true
-          //error:'somthing wrong'
-        });
+        this._getWeather(position.coords.latitude, position.coords.longitude);
       },
       error => {
+        console.log(error);
         this.setState({
-          error:error
-        })
-      } 
+          error: error.message
+        });
+      }
     );
-  }
-
+  };
+  _getWeather = (lat, long) => {
+    fetch(
+      `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&APPID=241051bf13976dd3ddf8b8d9f247255e`
+    )
+      .then(response => response.json())
+      .then(json => {
+        console.log(json);
+        this.setState({
+          temperature: json.main.temp,
+          name: json.weather[0].main,
+          isLoaded: true
+        });
+      });
+  };
   render() {
-    const { isLoaded, error } = this.state;
-
-
-
+    const { isLoaded, error, temperature, name } = this.state;
     return (
       <View style={styles.container}>
         <StatusBar hidden={true} />
-        {isLoaded ?
-          (<Weather />) :
-          (
+        {isLoaded ? (
+          <Weather 
+            temp={Math.floor(temperature - 273.15)} 
+            weatherName={name} /> 
+          ) : (
             <View style={styles.loading}>
               <Text style={styles.loadingText}>Getting the weather</Text>
               {error ? <Text style={styles.errorText}>{error}</Text> : null}
             </View>
-          )
-        }
+          )}
       </View>
     );
   }
